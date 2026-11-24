@@ -25,10 +25,10 @@ jobs:
             artifact: macos-arm64
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -84,7 +84,7 @@ jobs:
           tar -a -cf "packages/TinyKnight-${{ matrix.artifact }}.zip" -C "$(dirname "$src")" "$(basename "$src")"
 
       - name: Upload native package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: TinyKnight-${{ matrix.artifact }}
           path: packages/TinyKnight-${{ matrix.artifact }}.zip
@@ -95,10 +95,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -122,7 +122,7 @@ jobs:
           mv -f TinyKnight.pyxapp TinyKnight.html dist/
 
       - name: Upload portable builds
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: TinyKnight-portable
           path: |
@@ -138,8 +138,13 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: release-assets
           merge-multiple: true
@@ -147,6 +152,7 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
