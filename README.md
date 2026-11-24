@@ -211,7 +211,27 @@ python3 -m pyxel app2exe dist/TinyKnight.pyxapp
 
 得到的是适合当前系统和 CPU 架构的可执行文件（macOS 通常是一个 `.app` 或可执行文件夹），不是 Windows 的 `.exe`。PyInstaller 只能生成当前平台的文件，Apple Silicon 和 Intel 也需要分别打包；要发布 Windows 版仍然要在 Windows 上构建。
 
-### 5. 重新生成与清理
+### 5. 用 GitHub Actions 打多平台包
+
+`.github/workflows/package.yml` 会在 GitHub 托管的三台机器上分别打包，不需要本机安装对应系统：
+
+| 产物 | 平台 |
+| --- | --- |
+| `TinyKnight-windows-x64.zip` | Windows x64，解压后运行整个 `TinyKnight` 文件夹里的 `TinyKnight.exe` |
+| `TinyKnight-linux-x64.zip` | Linux x64，解压后运行 `TinyKnight/TinyKnight` |
+| `TinyKnight-macos-arm64.zip` | macOS Apple Silicon，解压后打开 `TinyKnight.app` |
+| `TinyKnight.pyxapp` / `TinyKnight.html` | 与系统无关，可直接分享 |
+
+推送版本标签后会自动构建，并把上面的文件挂到对应的 GitHub Release：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+不想发 Release 时，也可以在仓库的 Actions 页面手动运行「多平台打包」，完成后从该次运行的 Artifacts 下载。GitHub 免费托管机器没有 Intel 版 macOS，所以这里不生成 Intel Mac 包。macOS 包未签名，首次打开若被系统拦截，在访达里右键应用并选择“打开”。
+
+### 6. 重新生成与清理
 
 - 修改 `main.py` 或 `art.py` 后，必须重新执行 `pyxel package`，再重新生成 HTML / EXE；直接改 `dist` 里的文件不会生效。用 Makefile 时执行 `make -B dist` 可强制全部重建。
 - `build/` 只是打包时的临时目录，可以随时删除；`make clean` 会清理它、Python 缓存和 PyInstaller 的临时文件。
@@ -232,6 +252,7 @@ test-game/
 ├── requirements.txt    # 依赖
 ├── Makefile            # 一键构建：run / app / web / dist / exe / clean
 ├── build_windows.bat   # 在 Windows 上一键打包 EXE
+├── .github/workflows/package.yml  # GitHub Actions：Windows / Linux / macOS 打包
 ├── .gitignore          # 忽略缓存、临时构建和本地存档
 ├── dist/
 │   ├── TinyKnight.html   # 已生成的网页版
