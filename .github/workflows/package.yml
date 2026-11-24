@@ -52,15 +52,36 @@ jobs:
           python -m pyxel package build/TinyKnight build/TinyKnight/main.py
           python -m pyxel app2exe TinyKnight.pyxapp
 
-          if [ -d TinyKnight.app ]; then
-            tar -a -cf "packages/TinyKnight-${{ matrix.artifact }}.zip" TinyKnight.app
-          elif [ -d TinyKnight ]; then
-            tar -a -cf "packages/TinyKnight-${{ matrix.artifact }}.zip" TinyKnight
-          else
-            echo "app2exe produced no TinyKnight or TinyKnight.app"
+          # Pyxel 2.9 leaves the PyInstaller output in dist/. Older releases use the working directory.
+          src=""
+          for candidate in dist/TinyKnight.app dist/TinyKnight TinyKnight.app TinyKnight; do
+            if [ -d "$candidate" ]; then
+              src="$candidate"
+              break
+            fi
+          done
+          if [ -z "$src" ]; then
+            echo "app2exe produced no TinyKnight directory or TinyKnight.app"
+            echo "--- working directory ---"
             ls -la
+            echo "--- dist ---"
+            ls -la dist || true
             exit 1
           fi
+
+          case "${{ matrix.artifact }}" in
+            windows-x64)
+              test -f "$src/TinyKnight.exe"
+              ;;
+            linux-x64)
+              test -f "$src/TinyKnight"
+              ;;
+            macos-arm64)
+              test -d "$src/Contents/MacOS"
+              ;;
+          esac
+
+          tar -a -cf "packages/TinyKnight-${{ matrix.artifact }}.zip" -C "$(dirname "$src")" "$(basename "$src")"
 
       - name: Upload native package
         uses: actions/upload-artifact@v4
