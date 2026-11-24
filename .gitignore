@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Pyxel / PyInstaller build files
+build/
+*.spec
+/TinyKnight
+/TinyKnight.app
+
+# dist: keep the small shareable builds, ignore native bundles
+dist/*
+!dist/TinyKnight.html
+!dist/TinyKnight.pyxapp
+
+# Local game data
+highscore.txt
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
